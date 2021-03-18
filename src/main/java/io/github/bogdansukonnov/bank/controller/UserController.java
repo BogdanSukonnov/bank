@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,5 +26,11 @@ public class UserController {
     public List<UserDto> users() {
         log.debug("users()");
         return userService.users();
+    }
+
+    @GetMapping("users/{id}")
+    public UserDto user(@PathVariable String id) {
+        log.debug("users({})", id);
+        return userService.user(id);
     }
 }

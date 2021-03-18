@@ -30,6 +30,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-configuration-processor'
     implementation 'io.springfox:springfox-swagger2:2.4.0'
     implementation 'io.springfox:springfox-swagger-ui:2.4.0'
+    implementation 'org.cognitor.cassandra:cassandra-migration-spring-boot-starter:2.4.0_v4'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
