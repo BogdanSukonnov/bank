@@ -5,7 +5,9 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
-public class UserDto extends UserNoIdDto {
+public class UserNoIdDto {
 
-    private final String id;
+    private final String firstName;
+
+    private final String lastName;
 }

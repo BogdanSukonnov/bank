@@ -2,6 +2,7 @@ package io.github.bogdansukonnov.bank.service;
 
 import io.github.bogdansukonnov.bank.converter.UserConverter;
 import io.github.bogdansukonnov.bank.dto.UserDto;
+import io.github.bogdansukonnov.bank.dto.UserNoIdDto;
 import io.github.bogdansukonnov.bank.model.User;
 import io.github.bogdansukonnov.bank.repository.UserRepository;
 import lombok.NonNull;
@@ -38,9 +39,22 @@ public class UserService {
         return userConverter.toDto(optionalUser.orElseThrow());
     }
 
-    public UserDto addUser(UserDto userDto) {
-        User user = userConverter.toModel(userDto, UUID.randomUUID().toString());
+    public UserDto addUser(UserNoIdDto userNoIdDto) {
+        log.debug("addUser({})", userNoIdDto);
+        User user = userConverter.toModel(userNoIdDto, UUID.randomUUID().toString());
         user = userRepository.save(user);
+        log.debug("newUser({})", user);
         return userConverter.toDto(user);
+    }
+
+    public void deleteUser(String id) {
+        log.debug("deleteUser({})", id);
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            String errorMsg = String.format("Can't find user to delete with id - %s", id);
+            log.error(errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
+        userRepository.delete(optionalUser.get());
     }
 }
