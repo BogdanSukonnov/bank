@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
+import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -15,11 +16,12 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @Builder
 public class User {
 
-    @PrimaryKeyColumn(
-            name = "id", type = PrimaryKeyType.PARTITIONED)
+    @PrimaryKeyColumn(name = "id", type = PrimaryKeyType.PARTITIONED)
     private final String id;
 
+    @Column("first_name")
     private final String firstName;
 
+    @Column("last_name")
     private final String lastName;
 }

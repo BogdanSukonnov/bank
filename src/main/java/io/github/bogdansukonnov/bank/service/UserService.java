@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,13 +28,19 @@ public class UserService {
         log.debug("users()");
         List<User> userList = userRepository.findAll();
         return userList.stream()
-                .map(userConverter::convert)
+                .map(userConverter::toDto)
                 .collect(Collectors.toList());
     }
 
     public UserDto user(String id) {
         log.debug("user({})", id);
         Optional<User> optionalUser = userRepository.findById(id);
-        return userConverter.convert(optionalUser.orElseThrow());
+        return userConverter.toDto(optionalUser.orElseThrow());
+    }
+
+    public UserDto addUser(UserDto userDto) {
+        User user = userConverter.toModel(userDto, UUID.randomUUID().toString());
+        user = userRepository.save(user);
+        return userConverter.toDto(user);
     }
 }
