@@ -8,9 +8,11 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @RequiredArgsConstructor
-public class UserNoIdDto {
+public class NewAccountDto {
+
     @NonNull
-    private final String firstName;
+    private final String userId;
+
     @NonNull
-    private final String lastName;
+    private final String currency;
 }

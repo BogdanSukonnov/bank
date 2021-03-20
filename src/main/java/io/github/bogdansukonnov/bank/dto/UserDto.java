@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @ToString
-public class UserDto extends UserNoIdDto {
+public class UserDto extends NewUserDto {
     @NonNull
     private final String id;
 

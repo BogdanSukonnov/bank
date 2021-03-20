@@ -2,7 +2,7 @@ package io.github.bogdansukonnov.bank.service;
 
 import io.github.bogdansukonnov.bank.converter.UserConverter;
 import io.github.bogdansukonnov.bank.dto.UserDto;
-import io.github.bogdansukonnov.bank.dto.UserNoIdDto;
+import io.github.bogdansukonnov.bank.dto.NewUserDto;
 import io.github.bogdansukonnov.bank.model.User;
 import io.github.bogdansukonnov.bank.repository.UserRepository;
 import lombok.NonNull;
@@ -35,11 +35,11 @@ public class UserService {
 
     public UserDto user(String id) {
         log.debug("user({})", id);
-        Optional<User> optionalUser = userRepository.findById(id);
-        return userConverter.toDto(optionalUser.orElseThrow());
+        User user = getUserByIdOrThrow(id, "");
+        return userConverter.toDto(user);
     }
 
-    public UserDto addUser(UserNoIdDto userNoIdDto) {
+    public UserDto addUser(NewUserDto userNoIdDto) {
         log.debug("addUser({})", userNoIdDto);
         User user = userConverter.toModel(userNoIdDto, UUID.randomUUID().toString());
         user = userRepository.save(user);
@@ -49,12 +49,20 @@ public class UserService {
 
     public void deleteUser(String id) {
         log.debug("deleteUser({})", id);
+        User user = getUserByIdOrThrow(id, "to delete");
+        userRepository.delete(user);
+    }
+
+    public User getUserByIdOrThrow(String id, String operation) {
+        log.debug("getUserByIdOrThrow({}, {})", id, operation);
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
-            String errorMsg = String.format("Can't find user to delete with id - %s", id);
+            String errorMsg = String.format("Can't find user %s with id - %s", operation, id);
             log.error(errorMsg);
             throw new RuntimeException(errorMsg);
         }
-        userRepository.delete(optionalUser.get());
+        User user = optionalUser.get();
+        log.debug("{}", user);
+        return user;
     }
 }

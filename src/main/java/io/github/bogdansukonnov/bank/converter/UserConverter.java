@@ -1,7 +1,7 @@
 package io.github.bogdansukonnov.bank.converter;
 
 import io.github.bogdansukonnov.bank.dto.UserDto;
-import io.github.bogdansukonnov.bank.dto.UserNoIdDto;
+import io.github.bogdansukonnov.bank.dto.NewUserDto;
 import io.github.bogdansukonnov.bank.model.User;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ public class UserConverter {
                 .build();
     }
 
-    public User toModel(UserNoIdDto userDto, String newId) {
+    public User toModel(NewUserDto userDto, String newId) {
         return User.builder()
                 .id(newId)
                 .firstName(userDto.getFirstName())
