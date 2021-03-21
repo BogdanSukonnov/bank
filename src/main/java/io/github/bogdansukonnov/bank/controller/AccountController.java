@@ -3,6 +3,7 @@ package io.github.bogdansukonnov.bank.controller;
 import io.github.bogdansukonnov.bank.dto.AccountDto;
 import io.github.bogdansukonnov.bank.dto.NewAccountDto;
 import io.github.bogdansukonnov.bank.service.AccountService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.NonNull;
@@ -20,12 +21,13 @@ import java.util.UUID;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Log4j2
 @RequestMapping("api/accounts")
+@Api(tags = {"Accounts"})
 public class AccountController {
 
     @NonNull
     private final AccountService accountService;
 
-    @GetMapping(value = "/{userId}", produces = "application/json")
+    @GetMapping(value = "/by-user/{userId}", produces = "application/json")
     @ApiOperation("Get all accounts of given user")
     public List<AccountDto> accounts(@ApiParam("user id") @PathVariable("userId") UUID userId
             , HttpServletRequest request) {
@@ -33,13 +35,12 @@ public class AccountController {
         return accountService.userAccounts(userId);
     }
 
-    @GetMapping(value = "/{userId}/{accountId}", produces = "application/json")
+    @GetMapping(value = "/{accountId}", produces = "application/json")
     @ApiOperation("Get one account")
-    public AccountDto account(@ApiParam("user id") @PathVariable UUID userId,
-                              @ApiParam("account id") @PathVariable UUID accountId
+    public AccountDto account(@ApiParam("account id") @PathVariable UUID accountId
             , HttpServletRequest request) {
-        log.debug("{} - {} - {}", request.getRequestURI(), userId, accountId);
-        return accountService.account(userId, accountId);
+        log.debug("{} - {}", request.getRequestURI(), accountId);
+        return accountService.accountDto(accountId);
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
@@ -50,12 +51,11 @@ public class AccountController {
         return accountService.addAccount(newAccountDto);
     }
 
-    @DeleteMapping(value = "/{userId}/{accountId}", produces = "application/json")
+    @DeleteMapping(value = "/{accountId}", produces = "application/json")
     @ApiOperation("Remove account")
-    public void deleteAccount(@ApiParam("user id") @PathVariable UUID userId,
-                              @ApiParam("account id") @PathVariable UUID accountId,
+    public void deleteAccount(@ApiParam("account id") @PathVariable UUID accountId,
                               HttpServletRequest request) {
-        log.debug("{} - {} - {}", request.getRequestURI(), userId, accountId);
-        accountService.deleteAccount(userId, accountId);
+        log.debug("{} - {}", request.getRequestURI(), accountId);
+        accountService.deleteAccount(accountId);
     }
 }

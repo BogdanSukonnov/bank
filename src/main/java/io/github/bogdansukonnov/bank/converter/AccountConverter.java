@@ -19,14 +19,21 @@ public class AccountConverter {
     @NonNull
     private final MoneyService moneyService;
 
-    public AccountOfUser toModel(NewAccountDto newAccountDto, UUID accountId) {
-        return AccountOfUser.builder()
-                .primaryKey(AccountOfUser.AccountKey.builder()
-                        .userId(newAccountDto.getUserId())
-                        .accountId(accountId)
-                        .build())
+    public Account toModel(NewAccountDto newAccountDto, UUID accountId) {
+        return Account.builder()
+                .userId(newAccountDto.getUserId())
+                .accountId(accountId)
                 .balanceInCents(0L)
                 .currency(newAccountDto.getCurrency())
+                .build();
+    }
+
+    public AccountDto toDto(Account account) {
+        return AccountDto.builder()
+                .userId(account.getUserId())
+                .accountId(account.getAccountId())
+                .currency(account.getCurrency())
+                .balance(moneyService.toDouble(account.getBalanceInCents()))
                 .build();
     }
 
@@ -39,12 +46,14 @@ public class AccountConverter {
                 .build();
     }
 
-    public Account toAccount(AccountOfUser accountOfUser) {
-        return Account.builder()
-                .accountId(accountOfUser.getPrimaryKey().getAccountId())
-                .userId(accountOfUser.getPrimaryKey().getUserId())
-                .currency(accountOfUser.getCurrency())
-                .balanceInCents(accountOfUser.getBalanceInCents())
+    public AccountOfUser toAccountOfUser(Account account) {
+        return AccountOfUser.builder()
+                .primaryKey(AccountOfUser.AccountKey.builder()
+                        .accountId(account.getAccountId())
+                        .userId(account.getUserId())
+                        .build())
+                .currency(account.getCurrency())
+                .balanceInCents(account.getBalanceInCents())
                 .build();
     }
 }

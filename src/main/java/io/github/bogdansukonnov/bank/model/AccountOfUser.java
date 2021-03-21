@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @ToString
-@Builder
+@Builder(toBuilder=true)
 public class AccountOfUser {
 
     @PrimaryKey

@@ -3,6 +3,7 @@ package io.github.bogdansukonnov.bank.controller;
 import io.github.bogdansukonnov.bank.dto.NewUserDto;
 import io.github.bogdansukonnov.bank.dto.UserDto;
 import io.github.bogdansukonnov.bank.service.UserService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.NonNull;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Log4j2
 @RequestMapping("api/users")
+@Api(tags = {"Users"})
 public class UserController {
 
     @NonNull

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -39,12 +38,6 @@ public class OperationService {
                 .collect(Collectors.toList());
     }
 
-    public OperationDto operation(UUID accountId, UUID operationId) {
-        log.debug("operation({}, {})", accountId, operationId);
-        return operationConverter.toDto(operationInternal(accountId, operationId));
-    }
-
-
     public OperationDto addOperation(NewOperationDto newOperationDto) {
         log.debug("addOperation({})", newOperationDto);
         Account account = accountService.account(newOperationDto.getAccountId());
@@ -52,7 +45,7 @@ public class OperationService {
                 newOperationDto.getOperationType());
         if (newOperationDto.getOperationType().equals(OperationType.WITHDRAW) &&
                 balanceInCents < moneyService.toCents(newOperationDto.getSum())) {
-            String errorMsg = String.format("The account balance is not enough for operation. Balance: %d, %s sum: %d. %s",
+            String errorMsg = String.format("The account balance is not enough for operation. Balance: %,.2f, %s sum: %,.2f. %s",
                     moneyService.toDouble(balanceInCents), newOperationDto.getOperationType(),
                     newOperationDto.getSum(), newOperationDto);
             log.error(errorMsg);
@@ -61,27 +54,7 @@ public class OperationService {
         Operation operation = operationConverter.toModel(newOperationDto, Uuids.timeBased(), balanceInCents);
         operation = operationRepository.save(operation);
         log.debug("new operation {}", operation);
+        accountService.updateBalance(account, balanceInCents);
         return operationConverter.toDto(operation);
-    }
-
-    public void deleteOperation(UUID accountId, UUID operationId) {
-        log.debug("deleteOperation({}, {})", accountId, operationId);
-        Operation operation = operationInternal(accountId, operationId);
-        operationRepository.delete(operation);
-    }
-
-    private Operation operationInternal(UUID accountId, UUID operationId) {
-        Optional<Operation> optionalOperation = operationRepository.findById(
-                Operation.OperationKey.builder()
-                        .accountId(accountId)
-                        .operationId(operationId)
-                        .build());
-        if (optionalOperation.isEmpty()) {
-            String errorMsg = String.format("Can't find operation with account id - %s and operation id - %s",
-                    accountId, operationId);
-            log.error(errorMsg);
-            throw new RuntimeException(errorMsg);
-        }
-        return optionalOperation.get();
     }
 }

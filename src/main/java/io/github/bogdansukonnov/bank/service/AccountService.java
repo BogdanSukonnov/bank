@@ -26,7 +26,7 @@ public class AccountService {
     private final AccountOfUserRepository accountOfUserRepository;
     @NonNull
     private final AccountRepository accountRepository;
-    @NonNull 
+    @NonNull
     private final AccountConverter accountConverter;
     @NonNull
     private final UserService userService;
@@ -38,42 +38,21 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
-    public AccountDto account(UUID userId, UUID accountId) {
-        log.debug("account({}, {})", userId, accountId);
-        return accountConverter.toDto(accountInternal(userId, accountId));
-    }
-
-
     public AccountDto addAccount(NewAccountDto newAccountDto) {
         log.debug("addAccount({})", newAccountDto);
         userService.getUserByIdOrThrow(newAccountDto.getUserId(), "new account");
-        AccountOfUser accountOfUser = accountConverter.toModel(newAccountDto, UUID.randomUUID());
-        userService.getUserByIdOrThrow(newAccountDto.getUserId(), "to create account");
-        accountOfUser = accountOfUserRepository.save(accountOfUser);
-        log.debug("new account of user{}", accountOfUser);
-        accountRepository.save(accountConverter.toAccount(accountOfUser));
-        return accountConverter.toDto(accountOfUser);
+        Account account = accountConverter.toModel(newAccountDto, UUID.randomUUID());
+        account = accountRepository.save(account);
+        log.debug("new account {}", account);
+        AccountOfUser accountOfUser = accountConverter.toAccountOfUser(account);
+        accountOfUserRepository.save(accountOfUser);
+        return accountConverter.toDto(account);
     }
 
-    public void deleteAccount(UUID userId, UUID accountId) {
-        log.debug("deleteAccount({}, {})", userId, accountId);
-        AccountOfUser accountOfUser = accountInternal(userId, accountId);
-        accountOfUserRepository.delete(accountOfUser);
-    }
-
-    private AccountOfUser accountInternal(UUID userId, UUID accountId) {
-        Optional<AccountOfUser> optionalAccount = accountOfUserRepository.findById(
-                AccountOfUser.AccountKey.builder()
-                        .userId(userId)
-                        .accountId(accountId)
-                        .build());
-        if (optionalAccount.isEmpty()) {
-            String errorMsg = String.format("Can't find account with userId - %s and account id - %s",
-                    userId, accountId);
-            log.error(errorMsg);
-            throw new RuntimeException(errorMsg);
-        }
-        return optionalAccount.get();
+    public void deleteAccount(UUID accountId) {
+        log.debug("deleteAccount({})", accountId);
+        Account account = account(accountId);
+        accountRepository.delete(account);
     }
 
     public Account account(UUID accountId) {
@@ -84,5 +63,17 @@ public class AccountService {
             throw new RuntimeException(errorMsg);
         }
         return optionalAccount.get();
+    }
+
+    public AccountDto accountDto(UUID accountId) {
+        return accountConverter.toDto(account(accountId));
+    }
+
+    public Account updateBalance(Account oldAccount, long balanceInCents) {
+        Account account = oldAccount.toBuilder().balanceInCents(balanceInCents).build();
+        accountRepository.save(account);
+        AccountOfUser accountOfUser = accountConverter.toAccountOfUser(account);
+        accountOfUserRepository.save(accountOfUser);
+        return account;
     }
 }
