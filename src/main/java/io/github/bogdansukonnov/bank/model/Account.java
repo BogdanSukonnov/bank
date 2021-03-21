@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
-import org.springframework.data.cassandra.core.mapping.PrimaryKeyClass;
-import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
-import org.springframework.data.cassandra.core.mapping.Table;
+import org.springframework.data.cassandra.core.mapping.*;
 
 @Table("accounts_by_user")
 @AllArgsConstructor
@@ -22,6 +19,7 @@ public class Account {
 
     private final String currency;
 
+    @Column("balance_in_cents")
     private final long balanceInCents;
 
     @PrimaryKeyClass
@@ -30,10 +28,10 @@ public class Account {
     @ToString
     @Builder
     public static class AccountKey {
-        @PrimaryKeyColumn(ordinal = 0, type = PrimaryKeyType.PARTITIONED)
+        @PrimaryKeyColumn(name = "user_id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
         private final String userId;
 
-        @PrimaryKeyColumn(ordinal = 1, type = PrimaryKeyType.CLUSTERED)
+        @PrimaryKeyColumn(name = "account_id", ordinal = 1, type = PrimaryKeyType.CLUSTERED)
         private final String accountId;
     }
 }

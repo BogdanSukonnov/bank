@@ -3,7 +3,7 @@ package io.github.bogdansukonnov.bank.service;
 import io.github.bogdansukonnov.bank.converter.AccountConverter;
 import io.github.bogdansukonnov.bank.dto.NewAccountDto;
 import io.github.bogdansukonnov.bank.model.Account;
-import io.github.bogdansukonnov.bank.repository.AccountUserRepository;
+import io.github.bogdansukonnov.bank.repository.AccountRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @Log4j2
 public class AccountService {
     @NonNull
-    private final AccountUserRepository accountUserRepository;
+    private final AccountRepository accountRepository;
     @NonNull 
     private final AccountConverter accountConverter;
     @NonNull
@@ -27,7 +27,7 @@ public class AccountService {
 
     public List<Account> userAccounts(String userId) {
         log.debug("userAccounts({})", userId);
-        return accountUserRepository.getAllAccountsByUserId(userId);
+        return accountRepository.getAllAccountsByUserId(userId);
     }
 
     public Account account(String userId, String accountId) {
@@ -40,7 +40,7 @@ public class AccountService {
         log.debug("addAccount({})", newAccountDto);
         Account account = accountConverter.toModel(newAccountDto, UUID.randomUUID().toString());
         userService.getUserByIdOrThrow(newAccountDto.getUserId(), "to create account");
-        account = accountUserRepository.save(account);
+        account = accountRepository.save(account);
         log.debug("new account {}", account);
         return account;
     }
@@ -48,11 +48,11 @@ public class AccountService {
     public void deleteAccount(String userId, String accountId) {
         log.debug("deleteAccount({}, {})", userId, accountId);
         Account account = accountInternal(userId, accountId);
-        accountUserRepository.delete(account);
+        accountRepository.delete(account);
     }
 
     private Account accountInternal(String userId, String accountId) {
-        Optional<Account> optionalAccount = accountUserRepository.findById(
+        Optional<Account> optionalAccount = accountRepository.findById(
                 Account.AccountKey.builder()
                         .userId(userId)
                         .accountId(accountId)

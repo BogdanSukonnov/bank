@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AccountUserRepository extends CassandraRepository<Account, Account.AccountKey> {
+public interface AccountRepository extends CassandraRepository<Account, Account.AccountKey> {
 
-    @Query("SELECT * from accounts_by_user where userid = ?0")
+    @Query("SELECT * from accounts_by_user where user_id = ?0")
     List<Account> getAllAccountsByUserId(String userId);
 
 }
