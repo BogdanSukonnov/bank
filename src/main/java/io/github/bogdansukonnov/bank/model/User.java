@@ -8,6 +8,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.Table;
 
+import java.util.UUID;
+
 @Table("users")
 @AllArgsConstructor
 @Getter
@@ -16,7 +18,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 public class User {
 
     @Id
-    private final String id;
+    private final UUID id;
 
     @Column("first_name")
     private final String firstName;

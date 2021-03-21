@@ -5,12 +5,14 @@ import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+import java.util.UUID;
+
 @Data
 @SuperBuilder
 @ToString
 public class UserDto extends NewUserDto {
     @NonNull
-    private final String id;
+    private final UUID id;
 
     @Override
     public boolean equals(Object o) {

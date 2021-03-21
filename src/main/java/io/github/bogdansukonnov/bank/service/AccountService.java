@@ -1,8 +1,11 @@
 package io.github.bogdansukonnov.bank.service;
 
 import io.github.bogdansukonnov.bank.converter.AccountConverter;
+import io.github.bogdansukonnov.bank.dto.AccountDto;
 import io.github.bogdansukonnov.bank.dto.NewAccountDto;
 import io.github.bogdansukonnov.bank.model.Account;
+import io.github.bogdansukonnov.bank.model.AccountOfUser;
+import io.github.bogdansukonnov.bank.repository.AccountOfUserRepository;
 import io.github.bogdansukonnov.bank.repository.AccountRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +16,14 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Log4j2
 public class AccountService {
+    @NonNull
+    private final AccountOfUserRepository accountOfUserRepository;
     @NonNull
     private final AccountRepository accountRepository;
     @NonNull 
@@ -25,41 +31,55 @@ public class AccountService {
     @NonNull
     private final UserService userService;
 
-    public List<Account> userAccounts(String userId) {
+    public List<AccountDto> userAccounts(UUID userId) {
         log.debug("userAccounts({})", userId);
-        return accountRepository.getAllAccountsByUserId(userId);
+        return accountOfUserRepository.getAllAccountsByUserId(userId).stream()
+                .map(accountConverter::toDto)
+                .collect(Collectors.toList());
     }
 
-    public Account account(String userId, String accountId) {
+    public AccountDto account(UUID userId, UUID accountId) {
         log.debug("account({}, {})", userId, accountId);
-        return accountInternal(userId, accountId);
+        return accountConverter.toDto(accountInternal(userId, accountId));
     }
 
 
-    public Account addAccount(NewAccountDto newAccountDto) {
+    public AccountDto addAccount(NewAccountDto newAccountDto) {
         log.debug("addAccount({})", newAccountDto);
-        Account account = accountConverter.toModel(newAccountDto, UUID.randomUUID().toString());
+        userService.getUserByIdOrThrow(newAccountDto.getUserId(), "new account");
+        AccountOfUser accountOfUser = accountConverter.toModel(newAccountDto, UUID.randomUUID());
         userService.getUserByIdOrThrow(newAccountDto.getUserId(), "to create account");
-        account = accountRepository.save(account);
-        log.debug("new account {}", account);
-        return account;
+        accountOfUser = accountOfUserRepository.save(accountOfUser);
+        log.debug("new account of user{}", accountOfUser);
+        accountRepository.save(accountConverter.toAccount(accountOfUser));
+        return accountConverter.toDto(accountOfUser);
     }
 
-    public void deleteAccount(String userId, String accountId) {
+    public void deleteAccount(UUID userId, UUID accountId) {
         log.debug("deleteAccount({}, {})", userId, accountId);
-        Account account = accountInternal(userId, accountId);
-        accountRepository.delete(account);
+        AccountOfUser accountOfUser = accountInternal(userId, accountId);
+        accountOfUserRepository.delete(accountOfUser);
     }
 
-    private Account accountInternal(String userId, String accountId) {
-        Optional<Account> optionalAccount = accountRepository.findById(
-                Account.AccountKey.builder()
+    private AccountOfUser accountInternal(UUID userId, UUID accountId) {
+        Optional<AccountOfUser> optionalAccount = accountOfUserRepository.findById(
+                AccountOfUser.AccountKey.builder()
                         .userId(userId)
                         .accountId(accountId)
                         .build());
         if (optionalAccount.isEmpty()) {
             String errorMsg = String.format("Can't find account with userId - %s and account id - %s",
                     userId, accountId);
+            log.error(errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
+        return optionalAccount.get();
+    }
+
+    public Account account(UUID accountId) {
+        Optional<Account> optionalAccount = accountRepository.findById(accountId);
+        if (optionalAccount.isEmpty()) {
+            String errorMsg = String.format("Can't find account with account id - %s", accountId);
             log.error(errorMsg);
             throw new RuntimeException(errorMsg);
         }

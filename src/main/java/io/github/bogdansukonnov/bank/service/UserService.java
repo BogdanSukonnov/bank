@@ -1,8 +1,8 @@
 package io.github.bogdansukonnov.bank.service;
 
 import io.github.bogdansukonnov.bank.converter.UserConverter;
-import io.github.bogdansukonnov.bank.dto.UserDto;
 import io.github.bogdansukonnov.bank.dto.NewUserDto;
+import io.github.bogdansukonnov.bank.dto.UserDto;
 import io.github.bogdansukonnov.bank.model.User;
 import io.github.bogdansukonnov.bank.repository.UserRepository;
 import lombok.NonNull;
@@ -33,7 +33,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public UserDto user(String id) {
+    public UserDto user(UUID id) {
         log.debug("user({})", id);
         User user = getUserByIdOrThrow(id, "");
         return userConverter.toDto(user);
@@ -41,19 +41,19 @@ public class UserService {
 
     public UserDto addUser(NewUserDto userNoIdDto) {
         log.debug("addUser({})", userNoIdDto);
-        User user = userConverter.toModel(userNoIdDto, UUID.randomUUID().toString());
+        User user = userConverter.toModel(userNoIdDto, UUID.randomUUID());
         user = userRepository.save(user);
         log.debug("newUser({})", user);
         return userConverter.toDto(user);
     }
 
-    public void deleteUser(String id) {
+    public void deleteUser(UUID id) {
         log.debug("deleteUser({})", id);
         User user = getUserByIdOrThrow(id, "to delete");
         userRepository.delete(user);
     }
 
-    public User getUserByIdOrThrow(String id, String operation) {
+    public User getUserByIdOrThrow(UUID id, String operation) {
         log.debug("getUserByIdOrThrow({}, {})", id, operation);
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {

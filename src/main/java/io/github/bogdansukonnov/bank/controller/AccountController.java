@@ -1,7 +1,7 @@
 package io.github.bogdansukonnov.bank.controller;
 
+import io.github.bogdansukonnov.bank.dto.AccountDto;
 import io.github.bogdansukonnov.bank.dto.NewAccountDto;
-import io.github.bogdansukonnov.bank.model.Account;
 import io.github.bogdansukonnov.bank.service.AccountService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -26,7 +27,7 @@ public class AccountController {
 
     @GetMapping(value = "/{userId}", produces = "application/json")
     @ApiOperation("Get all accounts of given user")
-    public List<Account> accounts(@ApiParam("user id") @PathVariable("userId") String userId
+    public List<AccountDto> accounts(@ApiParam("user id") @PathVariable("userId") UUID userId
             , HttpServletRequest request) {
         log.debug("{} - {}", request.getRequestURI(), userId);
         return accountService.userAccounts(userId);
@@ -34,8 +35,8 @@ public class AccountController {
 
     @GetMapping(value = "/{userId}/{accountId}", produces = "application/json")
     @ApiOperation("Get one account")
-    public Account account(@ApiParam("user id") @PathVariable String userId,
-                           @ApiParam("account id") @PathVariable String accountId
+    public AccountDto account(@ApiParam("user id") @PathVariable UUID userId,
+                              @ApiParam("account id") @PathVariable UUID accountId
             , HttpServletRequest request) {
         log.debug("{} - {} - {}", request.getRequestURI(), userId, accountId);
         return accountService.account(userId, accountId);
@@ -43,7 +44,7 @@ public class AccountController {
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ApiOperation("Save new account")
-    public Account addAccount(@ApiParam("new account") @Valid @RequestBody NewAccountDto newAccountDto
+    public AccountDto addAccount(@ApiParam("new account") @Valid @RequestBody NewAccountDto newAccountDto
             , HttpServletRequest request) {
         log.debug("{} - {}", request.getRequestURI(), newAccountDto);
         return accountService.addAccount(newAccountDto);
@@ -51,8 +52,8 @@ public class AccountController {
 
     @DeleteMapping(value = "/{userId}/{accountId}", produces = "application/json")
     @ApiOperation("Remove account")
-    public void deleteAccount(@ApiParam("user id") @PathVariable String userId,
-                              @ApiParam("account id") @PathVariable String accountId,
+    public void deleteAccount(@ApiParam("user id") @PathVariable UUID userId,
+                              @ApiParam("account id") @PathVariable UUID accountId,
                               HttpServletRequest request) {
         log.debug("{} - {} - {}", request.getRequestURI(), userId, accountId);
         accountService.deleteAccount(userId, accountId);
