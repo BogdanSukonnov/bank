@@ -1,0 +1,29 @@
+version: '2'
+services:
+  cassandra-bank-compose:
+    image: 'cassandra:4.0'
+    container_name: cassandra-bank-compose
+    ports:
+      - 29042:9042
+    volumes:
+      - 'bank-api-cassandra-data:/var/lib/cassandra'
+    environment:
+      - CASSANDRA_KEYSPACE=bank
+  bank-api:
+    container_name: bank-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bank-api:latest
+    ports:
+      - 28080:8080
+    depends_on:
+      - cassandra-bank-compose
+    environment:
+      - cassandra.host=cassandra-bank-compose
+      - cassandra.keyspace=bank
+    volumes:
+      - ./wait.sh:/mnt/wait.sh
+    entrypoint: sh /mnt/wait.sh
+volumes:
+  bank-api-cassandra-data:
